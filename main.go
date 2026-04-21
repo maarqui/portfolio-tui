@@ -1,22 +1,122 @@
-package main 
+package main
 
-import( 
+import (
 	"fmt"
 	"os"
-	"strings"
-	// imprort bubble tea modules from repository
-	tea "github.com/charmbracelet/bubbletea"
+
+	tea 	 "github.com/charmbracelet/bubbletea"
+	lipgloss "github.com/charmbracelet/lipgloss"
 )
 
-// menuItem rerpesents a single option in the menu
-type menuItem struct {
+// ──────────────────────────────────────────────────────────────────
+//  COLOR PALETTE
+// ──────────────────────────────────────────────────────────────────
+
+var (
+	colorPrimary   = lipgloss.Color("#A7C7E7") // pastel blue
+	colorHighlight = lipgloss.Color("#F5E6A8") // pastel yellow — active item
+	colorText      = lipgloss.Color("#D0D0D0") // body text
+	colorDim       = lipgloss.Color("#707070") // inactive items, footer
+)
+
+// ──────────────────────────────────────────────────────────────────
+//  STYLES
+// ──────────────────────────────────────────────────────────────────
+
+var (
+	logoStyle = lipgloss.NewStyle().
+			Foreground(colorPrimary).
+			Bold(true)
+
+	bioStyle = lipgloss.NewStyle().
+			Foreground(colorText).
+			Width(58)
+
+	menuItemStyle = lipgloss.NewStyle().
+			Foreground(colorDim).
+			Padding(0, 2)
+
+	menuItemActiveStyle = lipgloss.NewStyle().
+				Foreground(colorHighlight).
+				Bold(true).
+				Padding(0, 2)
+
+	artStyle = lipgloss.NewStyle().
+			Foreground(colorPrimary).
+			Padding(1, 4, 0, 4)
+
+	rightColumnStyle = lipgloss.NewStyle().
+				PaddingLeft(2).
+				PaddingTop(1)
+
+	footerStyle = lipgloss.NewStyle().
+			Foreground(colorDim).
+			Padding(1, 2)
+)
+
+// ──────────────────────────────────────────────────────────────────
+//  ASCII ART
+// ──────────────────────────────────────────────────────────────────
+
+// logo. 
+const nameLogo = `
+ _ __ ___   __ _  __ _ _ __ __ _ _   _(_)
+| '_ ' _ \ / _' |/ _' | '__/ _' | | | | |
+| | | | | | (_| | (_| | | | (_| | |_| | |
+|_| |_| |_|\__,_|\__,_|_|  \__, |\__,_|_|
+                              |_|        
+`
+
+// ascii art (placeholder)
+// TODO: replace ascii art
+const asciiArtLogo = `
+░░░░▒▒▒▒▓▓▓▓████████▓▓▓▓▒▒▒▒░░░░
+░░▒▒▒▓▓▓▓██████████████▓▓▓▒▒▒░░
+░▒▒▓▓▓████████████████████▓▓▓▒▒░
+▒▓▓████████████████████████████▓▒
+▓██████████████████████████████▓
+████████████████████████████████
+████████████████████████████████
+████████████████████████████████
+████████████████████████████████
+████████████████████████████████
+▓██████████████████████████████▓
+▒▓▓████████████████████████████▓▒
+░▒▒▓▓▓████████████████████▓▓▓▒▒░
+░░▒▒▒▓▓▓▓██████████████▓▓▓▒▒▒░░
+░░░░▒▒▒▒▓▓▓▓████████▓▓▓▓▒▒▒▒░░░░
+`
+
+// ──────────────────────────────────────────────────────────────────
+//  CONTENT
+// ──────────────────────────────────────────────────────────────────
+
+const bio = `is a Computer Engineering student at
+Universidad San Jorge (Spain), currently
+on exchange at Hochschule Reutlingen (Germany).
+
+Focused on software development, data science,
+and machine learning. Hands-on experience with
+Python, SQL, Java, and C.
+
+Built projects exploring personality data,
+substance consumption patterns, and action
+recognition for live events.
+
+Explore the sections below →`
+
+// ──────────────────────────────────────────────────────────────────
+//  MODEL
+// ──────────────────────────────────────────────────────────────────
+
+// section rerpesents a single option in the menu
+type section struct {
 	title 		string
-	description string
 }
 
 // model holds state of the TUI
 type model struct{
-	menuItems []menuItem	// array of items that compose the screen
+	sections  []section		// array of items that compose the screen
 	cursor 	  int			// index of the currently highlighted item
 }
 
@@ -24,12 +124,12 @@ type model struct{
 func initialModel() model {
 	// fill the model with the initial elements
 	return model{
-		menuItems: []menuItem{
-			{title: "About me", description: "Who I am and what I do"}, 
-			{title: "Projects", description: "Things I've built"},
-			{title: "Skills", description: "Tech I work with"},
-			{title: "Contact", description: "How to reach me"},
-			{title: "CV", description: "Get my resume as a PDF"},
+		sections: []section{
+			{title: "About"}, 
+			{title: "Projects"},
+			{title: "Skills"},
+			{title: "Contact"},
+			{title: "CV"},
 		}, 
 		cursor: 0,
 	}
@@ -50,14 +150,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd){
 		// quit condition
 		case "ctrl+c", "q": 
 			return m, tea.Quit
-		// move cursor up (keys) - without exceding the avaliable elements
-		case "up", "k": 
+		// move cursor left (keys) - without exceding the avaliable elements
+		case "left", "h": 
 			if m.cursor > 0 {
 				m.cursor--
 			}
-		// move cursor down (keys) - without exceding the avaliable elements
-		case "down", "j": 
-			if m.cursor < len(m.menuItems)-1 {
+		// move cursor right (keys) - without exceding the avaliable elements
+		case "right", "l": 
+			if m.cursor < len(m.sections)-1 {
 				m.cursor++
 			}
 		// enter into section
@@ -71,30 +171,48 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd){
 // model.View function is called every time the state changes, 
 // it returns the new state of the model
 func (m model) View() string{
-	var b strings.Builder
+	// LEFT COLUMN contains the ascii logo
+	leftCol := artStyle.Render(asciiArtLogo)
 
-	//header of the TUI screen
-	b.WriteString("\n")
-	b.WriteString("  maarqui-tui — personal portfolio\n")
-	b.WriteString("  ─────────────────────────────────\n\n")
+	// RIGHT COLUMN contains name + bio + horizontal menu
+	logo := logoStyle.Render(nameLogo)
+	bioText := bioStyle.Render(bio)
 
-	// menu items
-	for i, item := range m.menuItems{
-		cursor := "  "
-		if m.cursor == i{
-			cursor = "▸ "
+	// build the horizontal menu
+	var menuItems []string
+	for i, s := range m.sections{
+		if i == m.cursor{
+			menuItems = append(menuItems, 
+			menuItemActiveStyle.Render("✦ "+s.title))
+		}else {
+			menuItems = append(menuItems, 
+			menuItemStyle.Render(" "+s.title))
 		}
-		b.WriteString(fmt.Sprintf("  %s%s\n", cursor, item.title))
 	}
+	// aling the menu items horizontally
+	menu := lipgloss.JoinHorizontal(lipgloss.Top, menuItems...)
 
-	// description of the highlighted item
-	b.WriteString("\n  ─────────────────────────────────\n")
-	b.WriteString(fmt.Sprintf("  %s\n", m.menuItems[m.cursor].description))
+	rightCol := rightColumnStyle.Render(
+		lipgloss.JoinVertical(
+			lipgloss.Left,
+			logo,
+			"",
+			bioText, 
+			"", 
+			"", 
+			menu,
+		),
+	)
 
-	// footer of the TUI screen
-	b.WriteString("\n  ↑/↓ navigate • enter select • q quit\n")
+	// align and combine the columns
+	mainContent := lipgloss.JoinHorizontal(lipgloss.Top, leftCol, rightCol)
+	// footer with keybinds
+	footer := footerStyle.Render(
+		"[← → to select · enter to open · q to quit]",
+	)
 
-	return b.String()
+	// return the complete layout
+	return lipgloss.JoinVertical(lipgloss.Left, mainContent, footer)
 }
 
 func main(){
