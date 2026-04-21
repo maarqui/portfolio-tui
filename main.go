@@ -109,7 +109,7 @@ Explore the sections below →`
 //  MODEL
 // ──────────────────────────────────────────────────────────────────
 
-// section rerpesents a single option in the menu
+// section rerpresents a single option in the menu
 type section struct {
 	title 		string
 }
@@ -186,10 +186,10 @@ func (m model) View() string{
 			menuItemActiveStyle.Render("✦ "+s.title))
 		}else {
 			menuItems = append(menuItems, 
-			menuItemStyle.Render(" "+s.title))
+			menuItemStyle.Render("  "+s.title))
 		}
 	}
-	// aling the menu items horizontally
+	// align the menu items horizontally
 	menu := lipgloss.JoinHorizontal(lipgloss.Top, menuItems...)
 
 	rightCol := rightColumnStyle.Render(
@@ -217,7 +217,7 @@ func (m model) View() string{
 
 func main(){
 	// bubbletea program with the model as the initial state
-	p := tea.NewProgram(initialModel())
+	p := tea.NewProgram(initialModel(), tea.WithAltScreen())
 
 	// run, if there is an error, print it and exit with err status 1
 	if _, err := p.Run(); err != nil {
