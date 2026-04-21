@@ -1,0 +1,30 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+portfolio-tui
+
+# Test binaries and coverage
+*.test
+*.out
+coverage.*
+
+# Dependency directories
+vendor/
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*~
+
+# OS
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# Env / local config
+.env
+.env.local
