@@ -6,7 +6,9 @@ Built with Go and the [Charm](https://charm.sh) ecosystem (Bubble Tea, Lip Gloss
 
 ## Status
 
-🚧 Work in progress — Phase 1: core navigation.
+🚧 Work in progress — Phase 2 complete. All sections populated with
+real content. Next: visual polish (responsive layout, animations)
+and SSH deployment via Wish.
 
 ## Try it locally
 
