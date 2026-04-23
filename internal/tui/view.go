@@ -107,11 +107,11 @@ func (m Model) detailView() string {
 	case "projects":
 		body = projectsBlockStyle.Render(m.renderProjects())
 	case "skills":
-		body = sectionBodyStyle.Render("(Skills section)")
+		body = m.renderSkills()
 	case "contact":
-		body = sectionBodyStyle.Render("(Contact section)")
+		body = m.renderContact()
 	case "cv":
-		body = sectionBodyStyle.Render("(CV download)")
+		body = m.renderCV()
 	default:
 		body = sectionBodyStyle.Render("Unknown section.")
 	}
@@ -154,4 +154,71 @@ func (m Model) renderProjects() string {
 	}
 
 	return b.String()
+}
+
+// ──────────────────────────────────────────────────────────────────
+//  SKILLS VIEW
+// ──────────────────────────────────────────────────────────────────
+
+// renderSkills builds the full skills block grouped by category.
+func (m Model) renderSkills() string {
+	var b strings.Builder
+
+	for _, cat := range content.Skills {
+		b.WriteString(skillCategoryStyle.Render(cat.Name) + "\n")
+		// Join items with a middle dot — a classic chip-list separator.
+		items := strings.Join(cat.Items, " · ")
+		b.WriteString(skillItemsStyle.Render(items) + "\n")
+	}
+
+	return skillsBlockStyle.Render(b.String())
+}
+
+// ──────────────────────────────────────────────────────────────────
+//  CONTACT VIEW
+// ──────────────────────────────────────────────────────────────────
+
+// renderContact builds the contact list with icons, labels and values.
+func (m Model) renderContact() string {
+	var b strings.Builder
+
+	for _, c := range content.Contacts {
+		icon := contactIconStyle.Render(c.Icon)
+		label := contactLabelStyle.Render(c.Label)
+		value := contactValueStyle.Render(c.Value)
+
+		// JoinHorizontal keeps icon / label / value on the same line
+		// with consistent widths (the label has a fixed Width(10)).
+		line := lipgloss.JoinHorizontal(lipgloss.Top,
+			icon, " ", label, value,
+		)
+		b.WriteString(line + "\n")
+	}
+
+	return contactBlockStyle.Render(b.String())
+}
+
+// ──────────────────────────────────────────────────────────────────
+//  CV VIEW
+// ──────────────────────────────────────────────────────────────────
+
+// renderCV builds a compact CV view: intro + structured blocks + hint.
+func (m Model) renderCV() string {
+	var b strings.Builder
+
+	// Intro paragraph.
+	b.WriteString(sectionBodyStyle.Render(content.CVIntro) + "\n")
+
+	// Structured blocks.
+	for _, block := range content.CVBlocks {
+		b.WriteString(cvHeadingStyle.Render(block.Heading) + "\n")
+		for _, line := range block.Lines {
+			b.WriteString(cvLineStyle.Render(line) + "\n")
+		}
+	}
+
+	// Download hint at the bottom.
+	b.WriteString(cvHintStyle.Render(content.CVDownloadHint))
+
+	return cvBlockStyle.Render(b.String())
 }

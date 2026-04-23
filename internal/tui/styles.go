@@ -74,4 +74,56 @@ var (
 
 	projectsBlockStyle = lipgloss.NewStyle().
     			MarginLeft(2)
+
+	// ── Skills view styles ──
+
+	skillsBlockStyle = lipgloss.NewStyle().
+				MarginLeft(2)
+
+	skillCategoryStyle = lipgloss.NewStyle().
+				Foreground(colorHighlight).
+				Bold(true).
+				MarginTop(1)
+
+	skillItemsStyle = lipgloss.NewStyle().
+				Foreground(colorText).
+				MarginLeft(2).
+				Width(80)
+
+	// ── Contact view styles ──
+
+	contactBlockStyle = lipgloss.NewStyle().
+				MarginLeft(2).
+				MarginTop(1)
+
+	contactIconStyle = lipgloss.NewStyle().
+				Foreground(colorPrimary).
+				Bold(true)
+
+	contactLabelStyle = lipgloss.NewStyle().
+				Foreground(colorDim).
+				Width(10)
+
+	contactValueStyle = lipgloss.NewStyle().
+				Foreground(colorText)
+
+	// ── CV view styles ──
+
+	cvBlockStyle = lipgloss.NewStyle().
+				MarginLeft(2)
+
+	cvHeadingStyle = lipgloss.NewStyle().
+				Foreground(colorHighlight).
+				Bold(true).
+				MarginTop(1)
+
+	cvLineStyle = lipgloss.NewStyle().
+				Foreground(colorText).
+				MarginLeft(2)
+
+	cvHintStyle = lipgloss.NewStyle().
+				Foreground(colorDim).
+				Italic(true).
+				MarginTop(2).
+				MarginLeft(2)
 )
