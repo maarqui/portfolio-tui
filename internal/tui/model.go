@@ -87,11 +87,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 // updateMenu handles keys while the main menu is visible.
 func (m Model) updateMenu(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch msg.String() {
-	case keyLeft, keyLeftV:
+	case keyLeft, keyLeftV, keyUp, keyUpV:
 		if m.cursor > 0 {
 			m.cursor--
 		}
-	case keyRight, keyRightV:
+	case keyRight, keyRightV, keyDown, keyDownV:
 		if m.cursor < len(m.sections)-1 {
 			m.cursor++
 		}

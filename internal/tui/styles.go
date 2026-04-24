@@ -2,7 +2,21 @@ package tui
 
 import "github.com/charmbracelet/lipgloss"
 
-// color palette — pastel blue for highlights/art, 
+// LAYOUT CONSTANTS
+// breakpoints in terminal columns.
+//
+//   width < minWidth          → "terminal too narrow" message
+//   minWidth <= w < wideWidth → collapsed vertical layout
+//   width >= wideWidth        → full two-column layout
+
+const (
+	minWidth     = 80
+	wideWidth    = 100
+	contentWidth = 130 // caps how wide the content grows
+)
+
+// COLOR PALLETE
+// pastel blue for highlights/art, 
 // pastel yellow for the active cursor,
 // grey for secondary info.
 var (
@@ -14,6 +28,7 @@ var (
 
 // styles used across all views.
 var (
+	// -- main view styles --
 	logoStyle = lipgloss.NewStyle().
 			Foreground(colorPrimary).
 			Bold(true)
@@ -43,7 +58,7 @@ var (
 			Foreground(colorDim).
 			Padding(1, 2)
 
-	// ── styles for the detail view ──
+	// -- about view styles --
 
 	sectionTitleStyle = lipgloss.NewStyle().
 				Foreground(colorHighlight).
@@ -54,6 +69,8 @@ var (
 				Foreground(colorText).
 				Padding(0, 2).
 				Width(80)
+
+	// -- projects view styles --
 
 	projectTitleStyle = lipgloss.NewStyle().
 				Foreground(colorPrimary).
@@ -75,7 +92,7 @@ var (
 	projectsBlockStyle = lipgloss.NewStyle().
     			MarginLeft(2)
 
-	// ── Skills view styles ──
+	// -- Skills view styles --
 
 	skillsBlockStyle = lipgloss.NewStyle().
 				MarginLeft(2)
@@ -90,7 +107,7 @@ var (
 				MarginLeft(2).
 				Width(80)
 
-	// ── Contact view styles ──
+	// -- Contact view styles --
 
 	contactBlockStyle = lipgloss.NewStyle().
 				MarginLeft(2).
@@ -107,7 +124,7 @@ var (
 	contactValueStyle = lipgloss.NewStyle().
 				Foreground(colorText)
 
-	// ── CV view styles ──
+	// -- CV view styles --
 
 	cvBlockStyle = lipgloss.NewStyle().
 				MarginLeft(2)
@@ -126,4 +143,43 @@ var (
 				Italic(true).
 				MarginTop(2).
 				MarginLeft(2)
+	
+	// -- responsiveness styles --
+
+	// case: terminal too narrow
+	tooNarrowStyle = lipgloss.NewStyle().
+				Foreground(colorHighlight).
+				Bold(true).
+				Align(lipgloss.Center)
 )
+
+//  LAYOUT HELPERS
+
+// fitContentWidth returns the effective content width for the current terminal.
+func fitContentWidth(termWidth int) int {
+	if termWidth > contentWidth {
+		return contentWidth
+	}
+	return termWidth
+}
+
+// centerHorizontally centers a block of content horizontally within
+// the given terminal width, padding both sides with blank space.
+func centerHorizontally(content string, termWidth int) string {
+	contentW := lipgloss.Width(content)
+	if contentW >= termWidth {
+		return content
+	}
+	leftPad := (termWidth - contentW) / 2
+	return lipgloss.NewStyle().PaddingLeft(leftPad).Render(content)
+}
+
+// placeFullScreen places content centered both horizontally and
+// vertically within the given terminal dimensions.
+func placeFullScreen(content string, termWidth, termHeight int) string {
+	return lipgloss.Place(
+		termWidth, termHeight,
+		lipgloss.Center, lipgloss.Center,
+		content,
+	)
+}
